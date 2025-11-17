@@ -6,11 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>road-friend</title>
 
-    <!--네이버지도 api -->
-<script
-  type="text/javascript"
-  src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=s34nnyfll8"
+    <script
+  src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=%VITE_NAVER_MAP_CLIENT_ID%"
 ></script>
+
+<script type="module" src="/naver-map-loader.js"></script>
+<script type="module">
+  window.loadNaverMap();
+</script>
 
 
   </head>
