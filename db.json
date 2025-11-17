@@ -1,0 +1,91 @@
+{
+  "users": [
+    {
+      "id": "4218",
+      "email": "user@example.com",
+      "password": "1111",
+      "nickname": "mm"
+    },
+    {
+      "id": "e6ed",
+      "email": "cw90210@naver.com",
+      "password": "1111",
+      "nickname": "ee"
+    }
+  ],
+  "busStops": [
+    {
+      "id": "1",
+      "name": "서울역",
+      "lat": 37.555,
+      "lng": 126.972,
+      "distance": 120,
+      "communityId": 1
+    },
+    {
+      "id": "2",
+      "name": "시청역",
+      "lat": 37.566,
+      "lng": 126.978,
+      "distance": 300,
+      "communityId": 2
+    }
+  ],
+  "communities": [
+    {
+      "id": "1",
+      "name": "구법원 사거리",
+      "reviewCount": 117,
+      "reviews": [
+        {
+          "id": 101,
+          "author": "익명",
+          "content": "월요일 오전 시간대에 66-4번 엄청 붐비네요...",
+          "tags": [
+            "월요일",
+            "9:00",
+            "10:00",
+            "14:00"
+          ],
+          "likes": 10,
+          "image": null
+        },
+        {
+          "id": 1762696866493,
+          "author": "익명",
+          "content": "ㄹㄹ",
+          "tags": [
+            "토요일",
+            "06:00",
+            "민원"
+          ],
+          "likes": 0,
+          "image": null
+        },
+        {
+          "id": 1762696911740,
+          "author": "익명",
+          "content": "ㄴㄴ",
+          "tags": [],
+          "likes": 0,
+          "image": null
+        },
+        {
+          "id": 1762699775597,
+          "author": "익명",
+          "content": "하하하",
+          "tags": [
+            "화요일",
+            "목요일",
+            "03:00",
+            "14:00",
+            "실시간 제보",
+            "민원"
+          ],
+          "likes": 0,
+          "image": null
+        }
+      ]
+    }
+  ]
+}
