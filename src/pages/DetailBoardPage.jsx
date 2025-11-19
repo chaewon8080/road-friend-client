@@ -10,12 +10,12 @@ export default function DetailBoardPage() {
   const { boardId } = useParams();
   const [board, setBoard] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [sort,setSort] = useState("latest");
 
     const navigate = useNavigate();
 
 
-  // UI 상태만 존재 (백엔드 연동을 위해 값만 준비해 놓음)
-  const [category, setCategory] = useState("전체");
+  const [category, setCategory] = useState("");
   const [departureTag, setDepartureTag] = useState("");
   const [arrivalTag, setArrivalTag] = useState("");
   const [timeTag, setTimeTag] = useState("");
@@ -24,30 +24,51 @@ export default function DetailBoardPage() {
     const token = localStorage.getItem("accessToken"); // JWT 토큰
 
 
+  // 게시글 fetch 함수
+  const fetchPosts = async () => {
+  try {
+    const params = new URLSearchParams();
 
+    if (category && (category!="전체")) params.append("category", category);
+    if (departureTag) params.append("departure", departureTag);
+    if (arrivalTag) params.append("arrival", arrivalTag);
+    if (timeTag) params.append("time", timeTag);
+    if (keyword) params.append("keyword", keyword);
+    params.append("sort", sort);
+
+    const res = await fetch(
+      `http://localhost:8080/boards/${boardId}?${params.toString()}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const data = await res.json();
+    setBoard(data);
+    setPosts(data.posts);
+
+  } catch (err) {
+    console.error("게시글 조회 실패", err);
+  }
+};
+
+    // 기본 초기 로딩
   useEffect(() => {
-      const getBoard = async () => {
-    try {
-      
-      const resBoard = await fetch(`http://localhost:8080/boards/${boardId}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-      const data = await resBoard.json();
-      setBoard(data);
-      setPosts(data.posts)
-    
-    } catch (err) {
-      console.error(err);
-    }
+    fetchPosts();
+  }, []);
+
+  // 자동 검색되는 조건: category, sort
+  useEffect(() => {
+    fetchPosts();
+  }, [category, sort]);
+
+  // Enter 눌렀을 때 검색 실행
+  const handleEnter = (e) => {
+    if (e.key === "Enter") fetchPosts();
   };
 
-  getBoard();
-  }, [boardId]);
-  if (!board) {
-    return <div className="p-6">로딩 중...</div>;
-  }
+
+  if (!board) return <div className="p-6">로딩중...</div>;
 
 
   return (
@@ -71,14 +92,19 @@ export default function DetailBoardPage() {
           </button>
         </div>
         <div className="flex gap-2 mt-2">
-          <button className="text-black">좋아요순</button>
-          <button className="text-black">최신순</button>
+          <button className="text-black" onClick={() => {
+              setSort("likes");
+                   }} >좋아요순</button>
+          <button className="text-black" onClick={() => {
+              setSort("latest");
+              
+            }}>최신순</button>
         </div>
       </div>
 
       {/* 카테고리 탭 일단 UI만 구현해놈 */}
       <div className="flex gap-3 mb-3 text-sm">
-        {["질문", "꿀팁 공유", "자유", "전체"].map(c => (
+        {["질문", "꿀팁 공유", "자유","전체"].map(c => (
           <button
             type="button"
             key={c}
@@ -86,7 +112,7 @@ export default function DetailBoardPage() {
                   ${category === c ? "bg-blue-500 text-white" : "bg-blue-300 text-white"}`
 
             }
-            onClick={() => setCategory(c)}
+            onClick={() => { setCategory(c); }}
           >
             {c}
           </button>
@@ -108,10 +134,15 @@ export default function DetailBoardPage() {
         <input type="search" id="default-search" placeholder="태그 검색"
           class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
           value={departureTag}
-            onChange={e => setDepartureTag(e.target.value)}
+           onChange={(e) => setDepartureTag(e.target.value)
+
+            
+           } 
+           onKeyDown={handleEnter}
     
           required />
-        <button type="submit"  class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
+        <button type="submit"    onClick={() =>fetchPosts() }
+ class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
     </div>
         </div>
 
@@ -127,10 +158,12 @@ export default function DetailBoardPage() {
         <input type="search" id="default-search" placeholder="태그 검색"
           class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
           value={arrivalTag}
-                      onChange={e => setArrivalTag(e.target.value)}
+          onChange={(e) => setArrivalTag(e.target.value)}
+          onKeyDown={handleEnter}
     
           required />
-        <button type="submit"  class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
+        <button type="submit"   onClick={() => setArrivalTag(arrivalTag)}
+  class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
     </div>
         </div>
 
@@ -146,10 +179,12 @@ export default function DetailBoardPage() {
         <input type="search" id="default-search" placeholder="태그 검색"
           class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
           value={timeTag}
-                      onChange={e => setTimeTag(e.target.value)}
+                   onChange={(e) => setTimeTag(e.target.value)}
+                    onKeyDown={handleEnter}
     
           required />
-        <button type="submit"  class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
+        <button type="submit"   onClick={() =>  fetchPosts()}
+  class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
     </div>
         </div>
 
@@ -165,16 +200,23 @@ export default function DetailBoardPage() {
         <input type="search" id="default-search" placeholder="키워드 검색"
           class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
           value={keyword}
-                      onChange={e => setKeyword(e.target.value)}
+          onKeyDown={handleEnter}
+          onChange={(e) => setKeyword(e.target.value)}
+          
+                      
     
           required />
-        <button type="submit"  class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
+        <button type="submit"   onClick={() => fetchPosts()}
+ class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
     </div>
 
       {/* 게시글 목록 (필터링 없음) */}
       <div className="space-y-6">
         {posts.map(post => (
-          <div key={post.id} className="bg-white border p-4 rounded shadow">
+          <div key={post.id} className="bg-white border p-4 rounded shadow"
+                   onClick={() => navigate(`/board/${boardId}/post/${post.id}`)}  
+
+          >
             <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
             <p className="text-gray-700 mb-3">{post.content}</p>
 
@@ -189,7 +231,7 @@ export default function DetailBoardPage() {
 
                <div className="flex items-center gap-1 text-black cursor-pointer">
                             <img src={CommentIcon} alt="comment" className="w-4 h-4" />
-                            <span>{post.comments ? post.comments.length : 0}</span>
+                            <span>{post.commentCount}</span>
                           </div>
 
             </div>

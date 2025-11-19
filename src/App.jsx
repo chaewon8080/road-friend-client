@@ -11,6 +11,8 @@ import CommunityPage from "./pages/CommunityPage";
 import ReviewWrite from "./pages/ReviewWrite";
 import DetailBoardPage from "./pages/DetailBoardPage";
 import PostWrite from "./pages/PostWrite";
+import ReviewEdit from "./pages/ReviewEdit";
+import PostDetailPage from "./pages/PostDetailPage";
 
 export default function App() {
   return (
@@ -30,6 +32,10 @@ export default function App() {
            <Route path="/community/:communityId/write-review" element={<ReviewWrite />} />
            <Route path="/board/:boardId" element={<DetailBoardPage></DetailBoardPage>}></Route>
             <Route path="/board/:boardId/write-post" element={<PostWrite/>} />
+            <Route path="/community/:communityId/edit-review/:reviewId" element={<ReviewEdit />} />
+            <Route path="/board/:boardId/post/:postId" element={<PostDetailPage />} />
+
+
 
 
 

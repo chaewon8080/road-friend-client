@@ -12,57 +12,141 @@ export default function CommunityPage() {
   const [likedReviews, setLikedReviews] = useState({}); // 리뷰별 좋아요 상태, 객체로 관리
   const [busStopName, setBusStopName] = useState("");
 const [reviewsData, setReviewsData] = useState([]);
+const [currentUserId, setCurrentUserId] = useState(null);
+
+//검색
+const [keyword, setKeyword] = useState("");
+const [tagInput, setTagInput] = useState("");
+//정렬
+const [sort, setSort] = useState("latest");
 
 
   const token = localStorage.getItem("accessToken"); // JWT 토큰
-
   useEffect(() => {
-  const getBusStopName = async () => {
+  const fetchMe = async () => {
+    const response = await fetch("http://localhost:8080/me", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+    setCurrentUserId(data.id);     // ← 여기 들어감
+  };
+
+  fetchMe();
+}, []);
+
+
+
+
+
+  // 리뷰 fetch 함수 (검색/정렬/태그 필터 모두 처리)
+  const fetchReviews = async ({ keyword = "", tags = [], sort = "latest" } = {}) => {
     try {
-      // 버스정류장 정보 호출
-      const resBusStop = await fetch(`http://localhost:8080/bus-stops/name/${communityId}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-      const data = await resBusStop.json();
-      const busStopName = data.name;
-            setBusStopName(busStopName);
+      const params = new URLSearchParams();
 
+      if (keyword) params.append("keyword", keyword);
+      tags.forEach((t) => params.append("tags", t));
+      params.append("sort", sort);
 
-      // 해당 버스정류장 리뷰 호출
-      const resReviews = await fetch(`http://localhost:8080/bus-stops/${communityId}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-      const reviewsData = await resReviews.json();
-      setReviewsData(reviewsData);
+      const res = await fetch(
+        `http://localhost:8080/bus-stops/${communityId}?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    
+      const data = await res.json();
+      setReviewsData(data);
+
     } catch (err) {
       console.error(err);
     }
   };
 
-  getBusStopName();
-}, [communityId]);
+  // 버스 정류장 이름과 기본 리뷰 로드
+  useEffect(() => {
+    const load = async () => {
+      try {
+        // 버스정류장 이름 가져오기
+        const resBusStop = await fetch(
+          `http://localhost:8080/bus-stops/name/${communityId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const busStopData = await resBusStop.json();
+        setBusStopName(busStopData.name);
 
- const handleLike = (reviewId) => {
-  // 이전 상태 복사
-  const newLikedReviews = { ...likedReviews };
+        // 기본 리뷰(최신순)
+        fetchReviews({ keyword: "", tags: [], sort: "latest" });
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  // 클릭한 리뷰 상태 반전
-  if (newLikedReviews[reviewId]) {
-    newLikedReviews[reviewId] = false; // 이미 좋아요였으면 취소
-  } else {
-    newLikedReviews[reviewId] = true;  // 아니면 좋아요
+    load();
+  }, [communityId]);
+
+
+
+  const handleDelete = async (reviewId) => {
+  if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+  try {
+    await fetch(`http://localhost:8080/bus-stops/${reviewId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // 삭제 후 리뷰 목록 새로고침
+    fetchReviews({ keyword, tags: [], sort });
+    
+  } catch (err) {
+    console.error("삭제 실패", err);
   }
-
-  // 상태 업데이트
-  setLikedReviews(newLikedReviews);
 };
 
+ const handleLike = async (reviewId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/bus-stops/${reviewId}/like`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json(); 
+
+    // 화면에서 해당 리뷰 데이터 업데이트
+    setReviewsData((prev) =>
+      prev.map((review) =>
+        review.id === reviewId
+          ? { ...review, likeCount: data.likeCount }
+          : review
+      )
+    );
+
+    // 좋아요 하트 상태 업데이트
+    setLikedReviews((prev) => ({
+      ...prev,
+      [reviewId]: data.liked,
+    }));
+
+  } catch (err) {
+    console.error("좋아요 실패", err);
+  }
+};
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -85,12 +169,18 @@ const [reviewsData, setReviewsData] = useState([]);
           </button>
         </div>
         <div className="flex gap-2 mt-2">
-          <button className="text-black">좋아요순</button>
-          <button className="text-black">최신순</button>
+          <button className="text-black" onClick={() => {
+              setSort("likes");
+              fetchReviews({ keyword, tags: [], sort: "likes" });
+            }}>좋아요순</button>
+          <button className="text-black" onClick={() => {
+              setSort("latest");
+              fetchReviews({ keyword, tags: [], sort: "latest" });
+            }}>최신순</button>
         </div>
       </div>
 
-      {/* 검색창 예시 */}
+      {/*키워드 검색*/}
       <div class="relative mb-4">
         <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -98,19 +188,56 @@ const [reviewsData, setReviewsData] = useState([]);
             </svg>
         </div>
         <input type="search" id="default-search" placeholder="키워드 검색"
+        value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+           onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      fetchReviews({
+        keyword,
+        tags: tagInput
+          .split(",")
+          .map((t) => t.trim())
+          ,
+        sort,
+      });
+    }
+  }}
           class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-        <button type="submit"  class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
+        <button type="submit"  onClick={() => fetchReviews({ keyword, tags: tagInput.split(",").map((t) => t.trim()), sort })} class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
     </div>
 
+{/*태그 검색*/}
        <div class="relative">
         <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
             </svg>
         </div>
-        <input type="search" id="default-search" placeholder="태그 검색"
+        <input type="search" id="default-search" placeholder="태그 검색(형식: 월요일, 8:00, 민원)"
+        value={tagInput}
+          onChange={(e) => setTagInput(e.target.value)}
+          onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      const tagList = tagInput
+        .split(",")
+        .map((t) => t.trim());
+      fetchReviews({
+        keyword: keyword,
+        tags: tagList,
+        sort,
+      });
+    }
+  }}
+
           class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required />
-        <button type="submit"  class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
+        <button type="submit"
+        onClick={() => {
+            const tagList = tagInput
+              .split(",")
+              .map((t) => t.trim());
+            fetchReviews({ keyword: keyword, tags: tagList, sort });
+          }}
+          class="text-white absolute end-2.5 bottom-2.5 bg-blue-300 hover:bg-blue-400 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-400 dark:hover:bg-blue-400 dark:focus:ring-blue-800">Search</button>
     </div>
 
       {/* 리뷰 목록 */}
@@ -121,10 +248,21 @@ const [reviewsData, setReviewsData] = useState([]);
               <img src={UserIcon} alt="icon" className="w-10 h-10" />
               <div className="text-black">{review.isAnonymous ? "익명" : `${review.authorNickName}`}</div>
             </div>
-            <div className="flex gap-2">
-              <button type="button" className="text-sm text-black">수정</button>
-              <button type="button" className="text-sm text-black">삭제</button>
-            </div>
+            {review.authorId === currentUserId && (
+  <div className="flex gap-2">
+    <button type="button" className="text-sm text-black"
+      onClick={() => navigate(`/community/${communityId}/edit-review/${review.id}`, { state: { review } })}
+    >
+      수정
+    </button>
+
+    <button type="button" className="text-sm text-black"
+      onClick={() => handleDelete(review.id)}
+    >
+      삭제
+    </button>
+  </div>
+)}
           </div>
 
           {review.imageUrl && (
