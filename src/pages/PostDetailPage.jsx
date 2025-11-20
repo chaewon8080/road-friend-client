@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import UserIcon from "../assets/User-Thumb.svg";
 import HeartEmptyIcon from "../assets/heart-empty.svg";
+import HeartFillIcon from "../assets/heart-fill.svg";
+
 import WarningIcon from "../assets/warning-circled-outline.svg";
 
 export default function PostDetailPage() {
@@ -14,6 +16,14 @@ export default function PostDetailPage() {
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [commentInput, setCommentInput] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
+
+  //좋아요
+  const [isPostLiked, setIsPostLiked] = useState(false);
+  const [likedComments, setLikedComments] = useState({});
+
+
+const navigate = useNavigate();
+
 
 
 
@@ -46,6 +56,14 @@ export default function PostDetailPage() {
       const data = await res.json();
       setPost(data);
       setComments(data.comments);
+      setIsPostLiked(data.liked); //이미 좋아요 눌렀는지 표시
+
+      // 댓글 이미 좋아요 눌렀는지 표시 
+      const commentLikeState = {};
+      data.comments.forEach((comment) => {
+      commentLikeState[comment.id] = comment.liked;
+       });
+       setLikedComments(commentLikeState);
     } catch (err) {
       console.error("게시글 상세 조회 실패", err);
     }
@@ -86,6 +104,120 @@ export default function PostDetailPage() {
     }
   };
 
+
+  const handlePostLike = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/boards/${boardId}/post/${postId}/like`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json(); 
+
+    setPost((prev) => ({
+      ...prev,
+      likeCount: data.likeCount,
+    }));
+
+    setIsPostLiked(data.liked);
+  } catch (err) {
+    console.error("게시글 좋아요 실패", err);
+  }
+};
+
+const handleCommentLike = async (commentId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/boards/${boardId}/post/${postId}/comment/${commentId}/like`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json(); // { liked: true/false, likeCount: 숫자 }
+
+    // 댓글 likeCount 업데이트
+    setComments((prev) =>
+      prev.map((comment) =>
+        comment.id === commentId
+          ? { ...comment, likeCount: data.likeCount }
+          : comment
+      )
+    );
+
+    // liked 상태 업데이트
+    setLikedComments((prev) => ({
+      ...prev,
+      [commentId]: data.liked,
+    }));
+  } catch (err) {
+    console.error("댓글 좋아요 실패", err);
+  }
+};
+
+const handleCommentDelete = async (commentId) => {
+  if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:8080/boards/${boardId}/post/${postId}/comment/${commentId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (!res.ok) {
+      alert("댓글 삭제 실패");
+      return;
+    }
+
+    // 삭제 후 전체 다시 새로고침
+    fetchPostDetail();    
+
+  } catch (err) {
+    console.error("댓글 삭제 실패", err);
+  }
+};
+
+//글 삭제
+const handlePostDelete = async () => {
+  if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:8080/boards/${boardId}/post/${postId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      alert("삭제 실패");
+      return;
+    }
+
+    navigate(`/board/${boardId}`); // 게시판 목록으로 이동
+  } catch (err) {
+    console.error("게시글 삭제 실패", err);
+  }
+};
+
+
+
+
+
   if (!post) return <div className="p-6">로딩중...</div>;
 
   return (
@@ -103,10 +235,10 @@ export default function PostDetailPage() {
          {/* 오른쪽 수정/삭제 버튼 */}
   {post.authorId === currentUserId && (
     <div className="absolute right-0 top-0 flex gap-2 text-sm">
-      <button className="text-black" onClick={() => console.log("게시글 수정")}>
+      <button className="text-black" onClick={() => navigate(`/boards/${boardId}/edit-post/${postId}`, { state: { post } })}>
         수정
       </button>
-      <button className="text-black" onClick={() => console.log("게시글 삭제")}>
+      <button className="text-black" onClick={handlePostDelete}>
         삭제
       </button>
     </div>
@@ -145,10 +277,17 @@ export default function PostDetailPage() {
       {/* 좋아요 / 신고 */}
       <div className="flex items-center gap-4 mb-6">
 
-        <div className="flex items-center gap-1">
-          <img src={HeartEmptyIcon} className="w-5 h-5" />
-          <span>{post.likeCount}</span>
-        </div>
+        <div
+  className="flex items-center gap-1 cursor-pointer"
+  onClick={handlePostLike}
+>
+  <img
+    src={isPostLiked ? HeartFillIcon : HeartEmptyIcon}
+    alt="heart"
+    className="w-5 h-5"
+  />
+  <span>{post.likeCount}</span>
+</div>
 
         <button className="text-gray-400">
           <img src={WarningIcon} className="w-5 h-5" />
@@ -162,10 +301,8 @@ export default function PostDetailPage() {
               {/* 댓글 오른쪽 수정/삭제 */}
     {c.authorId === currentUserId && (
       <div className="absolute right-0 top-0 flex gap-2 text-sm">
-        <button className="text-black" onClick={() => console.log("댓글 수정", c.id)}>
-          수정
-        </button>
-        <button className="text-black" onClick={() => console.log("댓글 삭제", c.id)}>
+        
+        <button className="text-black" onClick={() => handleCommentDelete(c.id)}>
           삭제
         </button>
       </div>
@@ -185,8 +322,13 @@ export default function PostDetailPage() {
 </div>
 
   <div className="flex items-center gap-3 mt-1">
-          <div className="flex items-center gap-1 text-black ml-11">
-            <img src={HeartEmptyIcon} className="w-4 h-4" />
+          <div className="flex items-center gap-1 text-black ml-11 cursor-pointer"
+           onClick={() => handleCommentLike(c.id)}
+          >
+            <img
+    src={likedComments[c.id] ? HeartFillIcon : HeartEmptyIcon}
+    className="w-4 h-4"
+  />
             <span>{c.likeCount}</span>
           </div>
 

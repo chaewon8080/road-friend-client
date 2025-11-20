@@ -60,7 +60,17 @@ const [sort, setSort] = useState("latest");
       );
 
       const data = await res.json();
-      setReviewsData(data);
+      
+
+      //기존에 이미 좋아요 눌렀는지 UI표시
+       const likeState = {};
+
+
+       data.forEach((review) => {
+      likeState[review.id] = review.liked;
+    });
+    setLikedReviews(likeState);
+    setReviewsData(data);
 
     } catch (err) {
       console.error(err);
