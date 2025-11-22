@@ -21,12 +21,15 @@ export default function PostEdit() {
 
   const token = localStorage.getItem("accessToken");
 
+        const API = import.meta.env.VITE_API_URL; 
+
+
    // 기존 게시글 정보 불러오기
   useEffect(() => {
     const load = async () => {
       try {
         // 게시판 정보
-        const resBoard = await fetch(`http://localhost:8080/boards/${boardId}`, {
+        const resBoard = await fetch(`${API}/boards/${boardId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -36,7 +39,7 @@ export default function PostEdit() {
 
         // 기존 게시글 정보
         const resPost = await fetch(
-          `http://localhost:8080/boards/${boardId}/post/${postId}`,
+          `${API}/boards/${boardId}/post/${postId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -79,7 +82,7 @@ export default function PostEdit() {
     };
 
     //
-    const res = await fetch(`http://localhost:8080/boards/${boardId}/post/${postId}`, {
+    const res = await fetch(`${API}/boards/${boardId}/post/${postId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -15,11 +15,14 @@ export default function ReviewWrite() {
 
   const token = localStorage.getItem("accessToken");
 
+          const API = import.meta.env.VITE_API_URL; 
+
+
 // 버스정류장 이름 가져오기
 useEffect(() => {
   const fetchBusStopName = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/bus-stops/name/${communityId}`, {
+      const res = await fetch(`${API}/bus-stops/name/${communityId}`, {
         headers: { "Authorization": `Bearer ${token}` },
       });
       const data = await res.json();
@@ -95,7 +98,7 @@ const types = ["실시간 제보", "민원"];
       imageUrl: null, // 나중에 이미지 업로드 붙일 경우 처리 
     };
 
-      const res = await fetch(`http://localhost:8080/bus-stops/${communityId}`, {
+      const res = await fetch(`${API}/bus-stops/${communityId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

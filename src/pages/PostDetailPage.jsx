@@ -16,6 +16,10 @@ export default function PostDetailPage() {
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [commentInput, setCommentInput] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUserEmail, setCurrentUserEmail] = useState("");
+
+      const API = import.meta.env.VITE_API_URL; 
+
 
   //좋아요
   const [isPostLiked, setIsPostLiked] = useState(false);
@@ -30,14 +34,15 @@ const navigate = useNavigate();
   //본인 불러오기
   useEffect(() => {
   const fetchMe = async () => {
-    const response = await fetch("http://localhost:8080/me", {
+    const response = await fetch(`${API}/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
 
     const data = await response.json();
-    setCurrentUserId(data.id);     
+    setCurrentUserId(data.id);  
+    setCurrentUserEmail(data.email);     
   };
 
   fetchMe();
@@ -47,7 +52,7 @@ const navigate = useNavigate();
   const fetchPostDetail = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8080/boards/${boardId}/post/${postId}`,
+        `${API}/boards/${boardId}/post/${postId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -79,7 +84,7 @@ const navigate = useNavigate();
 
     try {
       const data = await fetch(
-        `http://localhost:8080/boards/${boardId}/post/${postId}/comment`,
+        `${API}/boards/${boardId}/post/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -108,7 +113,7 @@ const navigate = useNavigate();
   const handlePostLike = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/boards/${boardId}/post/${postId}/like`,
+      `${API}/boards/${boardId}/post/${postId}/like`,
       {
         method: "POST",
         headers: {
@@ -133,7 +138,7 @@ const navigate = useNavigate();
 const handleCommentLike = async (commentId) => {
   try {
     const response = await fetch(
-      `http://localhost:8080/boards/${boardId}/post/${postId}/comment/${commentId}/like`,
+      `${API}/boards/${boardId}/post/${postId}/comment/${commentId}/like`,
       {
         method: "POST",
         headers: {
@@ -168,7 +173,7 @@ const handleCommentDelete = async (commentId) => {
 
   try {
     const res = await fetch(
-      `http://localhost:8080/boards/${boardId}/post/${postId}/comment/${commentId}`,
+      `${API}/boards/${boardId}/post/${postId}/comment/${commentId}`,
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
@@ -194,7 +199,7 @@ const handlePostDelete = async () => {
 
   try {
     const res = await fetch(
-      `http://localhost:8080/boards/${boardId}/post/${postId}`,
+      `${API}/boards/${boardId}/post/${postId}`,
       {
         method: "DELETE",
         headers: {
@@ -213,6 +218,67 @@ const handlePostDelete = async () => {
     console.error("게시글 삭제 실패", err);
   }
 };
+
+//글 신고 접수
+const handlePostReport = async () => {
+  const reason = window.prompt("게시글 신고 사유를 입력해주세요:");
+  if (!reason) return;
+
+  try {
+    const body = {
+      type: "POST",
+      targetId: Number(postId),
+      reporterEmail: currentUserEmail,
+      reason: reason
+    };
+
+    await fetch(`${API}/create-report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    alert("게시글 신고가 접수되었습니다.");
+  } catch (err) {
+    console.error("게시글 신고 실패", err);
+    alert("신고 중 오류가 발생했습니다.");
+  }
+};
+
+//댓글 신고 접수
+
+const handleCommentReport = async (comment) => {
+  const reason = window.prompt("댓글 신고 사유를 입력해주세요:");
+  if (!reason) return;
+
+  try {
+    const body = {
+      type: "COMMENT",
+      targetId: comment.id,
+      reporterEmail: currentUserEmail,
+      reason: reason
+    };
+
+    await fetch(`${API}/create-report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    alert("댓글 신고가 접수되었습니다.");
+  } catch (err) {
+    console.error("댓글 신고 실패", err);
+    alert("신고 중 오류가 발생했습니다.");
+  }
+};
+
+
 
 
 
@@ -289,7 +355,7 @@ const handlePostDelete = async () => {
   <span>{post.likeCount}</span>
 </div>
 
-        <button className="text-gray-400">
+        <button className="text-gray-400" onClick={handlePostReport}>
           <img src={WarningIcon} className="w-5 h-5" />
         </button>
       </div>
@@ -332,7 +398,8 @@ const handlePostDelete = async () => {
             <span>{c.likeCount}</span>
           </div>
 
-          <button className="text-gray-400">
+          <button className="text-gray-400"
+            onClick={() => handleCommentReport(c)}>
             <img src={WarningIcon} className="w-5 h-5" />
           </button>
         </div>

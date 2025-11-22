@@ -22,12 +22,13 @@ export default function PostWrite() {
     const token = localStorage.getItem("accessToken"); // JWT 토큰
 
 
-  
+          const API = import.meta.env.VITE_API_URL; 
+
   useEffect(() => {
       const getBoard = async () => {
     try {
       
-      const resBoard = await fetch(`http://localhost:8080/boards/${boardId}`, {
+      const resBoard = await fetch(`${API}/boards/${boardId}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },
@@ -61,7 +62,7 @@ export default function PostWrite() {
     };
 
     //
-    const res = await fetch(`http://localhost:8080/boards/${boardId}/posts`, {
+    const res = await fetch(`${API}/boards/${boardId}/posts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

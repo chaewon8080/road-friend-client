@@ -8,6 +8,9 @@ export default function SignUp() {
     const [confirmPassword, setConfirmPassword] = useState(""); 
   const [nickname, setNickname] = useState("");
 
+            const API = import.meta.env.VITE_API_URL; 
+
+
   const handleSubmit = async (e) => {
     // 페이지 새로고침 방지
     e.preventDefault(); 
@@ -23,7 +26,7 @@ export default function SignUp() {
 
     try {
         //fetch를 사용해서 서버로 http 요청 전송
-      const response = await fetch("http://localhost:8080/auth/signup", {
+      const response = await fetch(`${API}/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

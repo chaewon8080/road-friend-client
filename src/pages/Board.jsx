@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Board() {
+
+  const API = import.meta.env.VITE_API_URL; 
   const [boards, setBoards] = useState([]);
   const navigate = useNavigate();
 
@@ -11,7 +13,7 @@ export default function Board() {
   const getBoardList = async () => {
     try {
       
-      const resBoardList = await fetch(`http://localhost:8080/boards`, {
+      const resBoardList = await fetch(`${API}/boards`, {
         headers: {
           "Authorization": `Bearer ${token}`,
         },

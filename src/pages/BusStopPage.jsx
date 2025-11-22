@@ -8,6 +8,8 @@ export default function BusStopPage() {
   const [location, setLocation] = useState(null);
   const [busStops, setBusStops] = useState([]);
   const [searchKeyword,setSearchKeyword] = useState("");
+    const API = import.meta.env.VITE_API_URL; 
+
 
   const navigate = useNavigate();
 
@@ -28,7 +30,7 @@ export default function BusStopPage() {
 
     //API 호출
       const res = await fetch(
-        `http://localhost:8080/bus-stops/nearby?lat=${coords.lat}&lng=${coords.lng}`,
+        `${API}/bus-stops/nearby?lat=${coords.lat}&lng=${coords.lng}`,
         {
           method: "GET",
           headers: {
@@ -56,7 +58,7 @@ export default function BusStopPage() {
 
     
       const res = await fetch(
-        `http://localhost:8080/bus-stops/search?keyword=${encodeURIComponent(searchKeyword)}`,
+        `${API}/bus-stops/search?keyword=${encodeURIComponent(searchKeyword)}`,
         {
           method: "GET",
           headers: { "Authorization": `Bearer ${token}` },

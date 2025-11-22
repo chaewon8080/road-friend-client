@@ -14,6 +14,7 @@ import PostWrite from "./pages/PostWrite";
 import ReviewEdit from "./pages/ReviewEdit";
 import PostDetailPage from "./pages/PostDetailPage";
 import PostEdit from "./pages/PostEdit";
+import ReportDetailPage from "./pages/ReportDetailPage";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/community/:communityId/edit-review/:reviewId" element={<ReviewEdit />} />
             <Route path="/board/:boardId/post/:postId" element={<PostDetailPage />} />
             <Route path="/boards/:boardId/edit-post/:postId" element={<PostEdit />}/>
+            <Route path="/reports"element={<ReportDetailPage></ReportDetailPage>}> </Route>
 
 
 

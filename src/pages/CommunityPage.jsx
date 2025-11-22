@@ -13,6 +13,11 @@ export default function CommunityPage() {
   const [busStopName, setBusStopName] = useState("");
 const [reviewsData, setReviewsData] = useState([]);
 const [currentUserId, setCurrentUserId] = useState(null);
+const [meEmail, setMeEmail] = useState("");
+
+    const API = import.meta.env.VITE_API_URL; 
+
+
 
 //검색
 const [keyword, setKeyword] = useState("");
@@ -24,7 +29,7 @@ const [sort, setSort] = useState("latest");
   const token = localStorage.getItem("accessToken"); // JWT 토큰
   useEffect(() => {
   const fetchMe = async () => {
-    const response = await fetch("http://localhost:8080/me", {
+    const response = await fetch(`${API}/me`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -32,6 +37,7 @@ const [sort, setSort] = useState("latest");
 
     const data = await response.json();
     setCurrentUserId(data.id);     // ← 여기 들어감
+     setMeEmail(data.email); 
   };
 
   fetchMe();
@@ -51,7 +57,7 @@ const [sort, setSort] = useState("latest");
       params.append("sort", sort);
 
       const res = await fetch(
-        `http://localhost:8080/bus-stops/${communityId}?${params.toString()}`,
+        `${API}/bus-stops/${communityId}?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -83,7 +89,7 @@ const [sort, setSort] = useState("latest");
       try {
         // 버스정류장 이름 가져오기
         const resBusStop = await fetch(
-          `http://localhost:8080/bus-stops/name/${communityId}`,
+          `${API}/bus-stops/name/${communityId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -109,7 +115,7 @@ const [sort, setSort] = useState("latest");
   if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
   try {
-    await fetch(`http://localhost:8080/bus-stops/${reviewId}`, {
+    await fetch(`${API}/bus-stops/${reviewId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -127,7 +133,7 @@ const [sort, setSort] = useState("latest");
  const handleLike = async (reviewId) => {
   try {
     const response = await fetch(
-      `http://localhost:8080/bus-stops/${reviewId}/like`,
+      `${API}/bus-stops/${reviewId}/like`,
       {
         method: "POST",
         headers: {
@@ -157,6 +163,40 @@ const [sort, setSort] = useState("latest");
     console.error("좋아요 실패", err);
   }
 };
+
+
+//신고 접수 
+
+const handleReport = async (review) => {
+  const reason = window.prompt("신고 사유를 입력해주세요:");
+  if (!reason) return;
+
+  try {
+    const body = {
+      type: "REVIEW",
+      targetId: review.id,
+      reporterEmail: meEmail,
+      reason: reason
+    };
+
+    await fetch(`${API}/create-report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    });
+
+    alert("신고가 접수되었습니다.");
+  } catch (err) {
+    console.error("신고 실패", err);
+    alert("신고 중 오류가 발생했습니다.");
+  }
+};
+
+
+
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -322,6 +362,7 @@ const [sort, setSort] = useState("latest");
             <button
               type="button"
               className="text-gray-400 hover:text-red-500"
+               onClick={() => handleReport(review)}
             >
               <img src={WarningIcon} alt="신고" className="w-4 h-4" />
             </button>

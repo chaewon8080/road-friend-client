@@ -23,6 +23,9 @@ export default function DetailBoardPage() {
 
     const token = localStorage.getItem("accessToken"); // JWT 토큰
 
+        const API = import.meta.env.VITE_API_URL; 
+
+
 
   // 게시글 fetch 함수
   const fetchPosts = async () => {
@@ -37,7 +40,7 @@ export default function DetailBoardPage() {
     params.append("sort", sort);
 
     const res = await fetch(
-      `http://localhost:8080/boards/${boardId}?${params.toString()}`,
+      `${API}/boards/${boardId}?${params.toString()}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

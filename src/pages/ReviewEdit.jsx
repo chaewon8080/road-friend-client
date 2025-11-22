@@ -15,20 +15,22 @@ export default function ReviewEdit() {
   const [isAnonymous, setIsAnonymous] = useState(true);
 
   const token = localStorage.getItem("accessToken");
+          const API = import.meta.env.VITE_API_URL; 
+
 
   // 버스정류장 이름 & 기존 리뷰 불러오기
   useEffect(() => {
     const load = async () => {
       try {
         // 정류장 이름
-        const resBusStop = await fetch(`http://localhost:8080/bus-stops/name/${communityId}`, {
+        const resBusStop = await fetch(`${API}/bus-stops/name/${communityId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const dataBusStop = await resBusStop.json();
         setCommunityName(dataBusStop.name);
 
         // 기존 리뷰 조회
-        const resReview = await fetch(`http://localhost:8080/bus-stops/reviews/${reviewId}`, {
+        const resReview = await fetch(`${API}/bus-stops/reviews/${reviewId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const review = await resReview.json();
@@ -100,7 +102,7 @@ for (let i = 0; i < 24; i++) {
       imageUrl: image
     };
 
-    const res = await fetch(`http://localhost:8080/bus-stops/${reviewId}`, {
+    const res = await fetch(`${API}/bus-stops/${reviewId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
