@@ -13,6 +13,11 @@ export default function BusStopPage() {
 
   const navigate = useNavigate();
 
+
+  useEffect(() => {
+    loadNaverMap();
+  }, []);
+
   const handleLocation = async (coords) => {
 
    // localStorage.clear();
