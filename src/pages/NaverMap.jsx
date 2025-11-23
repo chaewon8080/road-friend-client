@@ -3,7 +3,6 @@ import BusStopIcon from "../assets/bus-stop.svg";
 import CurrentLocationIcon from "../assets/current-location.svg";
 import LocationIcon from "../assets/location.svg";
 import { useParams,useNavigate } from "react-router-dom";
-import { loadNaverMap } from "../naver-map-loader";
 
 
 
@@ -19,9 +18,7 @@ export default function NaverMap({onSelectLocation , busStops}) {
   const busStopMarkersRef = useRef([]); //버스정류장 마커 
   const [mapReady, setMapReady] = useState(false);
 
-  useEffect(() => {
-    loadNaverMap();
-  }, []);
+  
 
   useEffect(() => {
     // map을 한 번만 생성

@@ -15,8 +15,17 @@ import ReviewEdit from "./pages/ReviewEdit";
 import PostDetailPage from "./pages/PostDetailPage";
 import PostEdit from "./pages/PostEdit";
 import ReportDetailPage from "./pages/ReportDetailPage";
+import { loadNaverMap } from "./naver-map-loader";
+import { useEffect, useState } from "react";
+
 
 export default function App() {
+
+    useEffect(() => {
+    loadNaverMap(() => {
+      console.log("네이버 지도 SDK 로드 완료");
+    });
+  }, []);
   return (
     <Router>
       <Navbar />
