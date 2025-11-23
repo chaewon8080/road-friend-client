@@ -19,6 +19,10 @@ export default function NaverMap({onSelectLocation , busStops}) {
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
+    loadNaverMap();
+  }, []);
+
+  useEffect(() => {
     // map을 한 번만 생성
     const newMap = new window.naver.maps.Map(mapRef.current, {
       center: new window.naver.maps.LatLng(37, 126.876),
