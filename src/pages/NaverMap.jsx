@@ -3,6 +3,7 @@ import BusStopIcon from "../assets/bus-stop.svg";
 import CurrentLocationIcon from "../assets/current-location.svg";
 import LocationIcon from "../assets/location.svg";
 import { useParams,useNavigate } from "react-router-dom";
+import { loadNaverMap } from "../naver-map-loader";
 
 
 

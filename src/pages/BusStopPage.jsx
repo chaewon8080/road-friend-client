@@ -3,6 +3,7 @@ import NaverMap from "./NaverMap";
 import { useNavigate } from "react-router-dom";
 import BusStopIcon from "../assets/bus-stop.svg";
 import { useEffect } from "react";
+import { loadNaverMap } from "../naver-map-loader";
 
 export default function BusStopPage() {
   const [location, setLocation] = useState(null);
