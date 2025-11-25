@@ -7,6 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
               const API = import.meta.env.VITE_API_URL; 
+              const GOOGLE_LOGIN_URL = import.meta.env.VITE_GOOGLE_LOGIN_URL;
 
 
    const handleLogin = async (e) => {
@@ -59,12 +60,14 @@ export default function Login() {
     </div> 
         
         <div className="space-y-2 mt-4">
+           <a href={GOOGLE_LOGIN_URL}>
             <button
               type="button"
               className="flex items-center justify-center w-full bg-blue-500 text-white rounded-md py-2 font-bold hover:bg-blue-600"
             >
               <span className="mr-2 font-bold text-lg">G</span> 구글 로그인
             </button>
+            </a> 
             <button
               type="button"
               className="flex items-center justify-center w-full rounded-md py-2 bg-green-500 font-bold text-white hover:bg-green-600"

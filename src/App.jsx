@@ -15,6 +15,7 @@ import ReviewEdit from "./pages/ReviewEdit";
 import PostDetailPage from "./pages/PostDetailPage";
 import PostEdit from "./pages/PostEdit";
 import ReportDetailPage from "./pages/ReportDetailPage";
+import OAuthRedirectPage from "./pages/OAuthRedirectPage";
 import { loadNaverMap } from "./naver-map-loader";
 import { useEffect, useState } from "react";
 
@@ -47,6 +48,8 @@ export default function App() {
             <Route path="/board/:boardId/post/:postId" element={<PostDetailPage />} />
             <Route path="/boards/:boardId/edit-post/:postId" element={<PostEdit />}/>
             <Route path="/reports"element={<ReportDetailPage></ReportDetailPage>}> </Route>
+            <Route path="/oauth/redirect" element={<OAuthRedirectPage />} />
+
 
 
 
