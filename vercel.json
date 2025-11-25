@@ -4,7 +4,11 @@
   "outputDirectory": "dist",
   "installCommand": "npm install --include=dev",
   "devCommand": "npm run dev",
-  "rewrites": [
+    "rewrites": [
+    {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
