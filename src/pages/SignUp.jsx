@@ -9,6 +9,8 @@ export default function SignUp() {
   const [nickname, setNickname] = useState("");
 
             const API = import.meta.env.VITE_API_URL; 
+                          const GOOGLE_LOGIN_URL = import.meta.env.VITE_GOOGLE_LOGIN_URL;
+
 
 
   const handleSubmit = async (e) => {
