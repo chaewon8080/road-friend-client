@@ -13,6 +13,20 @@ export default function Home() {
       <section className="grid grid-cols-3 gap-6">
        
       </section>
+
+
+       {/* 출처 표기 */}
+      <p className="text-xs text-gray-400 mt-12">
+        UI Icons Image:
+        Adapted from "Wireframes Kit - Free wireframing Websites and SaaS UI/UX" by Bogdan Hutuleac  
+Licensed under CC BY 4.0  
+Source: https://www.figma.com/community/file/1221009141145444839/wireframes-kit-free-wireframingwebsites-and-saas-ui-ux  
+Components were customized.
+      </p>
+
+
+
+
     </div>
   );
 }
