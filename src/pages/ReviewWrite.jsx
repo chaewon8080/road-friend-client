@@ -185,7 +185,8 @@ if (type === "day") {
       </div>
 
       {/* 리뷰 내용 */}
-      <textarea id="message" rows="4" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full p-3.5 shadow-xs placeholder:text-body" 
+      <textarea id="message" rows="4" class="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand 
+      focus:border-brand block w-full p-3.5 shadow-xs placeholder:text-body" 
        placeholder="여기에 리뷰를 작성하세요."
         className="mb-2 w-full p-2 border rounded"
         value={content}
