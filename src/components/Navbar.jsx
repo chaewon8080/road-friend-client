@@ -30,12 +30,13 @@ export default function Navbar() {
       </div>
 
        {/* 메뉴 */}
-          <div className="flex justify-center items-center gap-40">
-            <Link to="/reviews" className="text-black font-bold hover:text-blue-400">버스정류장 리뷰</Link>
-            <Link to="/board" className="text-black font-bold hover:text-blue-400">지역 간 경로 게시판</Link>
-            <Link to="/insight" className="text-black font-bold hover:text-blue-400">교통 인사이트</Link>
-             <Link to="/gpt" className="text-black font-bold hover:text-blue-400">AI 길찾기</Link>
-          </div>
+          {/* 메뉴 */}
+<div className="flex flex-wrap justify-center items-center gap-4 sm:gap-10 md:gap-40">
+  <Link to="/reviews" className="text-black font-bold hover:text-blue-400">버스정류장 리뷰</Link>
+  <Link to="/board" className="text-black font-bold hover:text-blue-400">지역 간 경로 게시판</Link>
+  <Link to="/insight" className="text-black font-bold hover:text-blue-400">교통 인사이트</Link>
+  <Link to="/gpt" className="text-black font-bold hover:text-blue-400">AI 길찾기</Link>
+</div>
     </nav>
   );
 }
