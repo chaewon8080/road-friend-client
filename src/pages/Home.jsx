@@ -43,6 +43,8 @@ export default function Home() {
 Licensed under CC BY 4.0  
 Source: https://www.figma.com/community/file/1221009141145444839/wireframes-kit-free-wireframingwebsites-and-saas-ui-ux  
 Components were customized.
+홈 화면에 메인 이미지, 길친구 서비스 로고는 AI를 활용하여 생성되었습니다.
+
       </p>
 
 
