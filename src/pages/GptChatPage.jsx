@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function GptChatPage() {
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "안녕하세요! 길친구 GPT입니다 😊" }
+    { role: "assistant", content: "안녕하세요! 길친구 챗봇입니다 😊" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
